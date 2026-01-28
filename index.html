@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LawBot BD - Bangladesh Legal Assistant</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .chat-container {
+            height: calc(100vh - 180px);
+        }
+
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .message-user {
+            background-color: #1e293b;
+            color: white;
+            border-radius: 18px 18px 0 18px;
+        }
+
+        .message-bot {
+            background-color: #ffffff;
+            color: #1e293b;
+            border-radius: 18px 18px 18px 0;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prose p {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .prose ul,
+        .prose ol {
+            padding-left: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .prose ul {
+            list-style-type: disc;
+        }
+
+        .prose ol {
+            list-style-type: decimal;
+        }
+
+        .prose li {
+            margin-bottom: 0.25rem;
+        }
+
+        .prose h1,
+        .prose h2,
+        .prose h3 {
+            font-weight: 700;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: inherit;
+        }
+
+        .prose strong {
+            font-weight: 700;
+            color: #064e3b;
+        }
+
+        .message-user .prose strong {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        .prose code {
+            background: #f1f5f9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-600 p-2 rounded-lg">
+                    <i class="fas fa-scale-balanced text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">LawBot <span class="text-emerald-400">BD</span></h1>
+                    <p class="text-xs text-slate-400">Expert Bangladesh Legal AI Assistant</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="clearBtn" title="Clear Chat"
+                    class="p-2 hover:bg-slate-800 rounded-full transition-colors text-slate-400">
+                    <i class="fas fa-trash-can text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Chat Area -->
+    <main class="flex-grow max-w-5xl w-full mx-auto px-4 py-6 flex flex-col">
+
+        <!-- Welcome Section / Empty State -->
+        <div id="welcome-screen" class="flex-grow flex flex-col items-center justify-center text-center space-y-6">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 max-w-2xl">
+                <i class="fas fa-gavel text-5xl text-emerald-600 mb-4"></i>
+                <h2 class="text-2xl font-bold text-slate-800">Assalam-u-Alaikum!</h2>
+                <p class="text-slate-600 mt-2">I am your specialized AI assistant for the laws of Bangladesh. I can help
+                    with queries regarding the Penal Code, Constitution, Civil Procedure, Family Law, and more.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-8">
+                    <button onclick="quickPrompt('What are the inheritance laws in Bangladesh for Muslims?')"
+                        class="text-left p-3 border border-slate-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 transition-all text-sm group">
+                        <span class="block font-semibold group-hover:text-emerald-700">Inheritance Laws</span>
+                        <span class="text-slate-500 text-xs text-balance">Muslim & Hindu inheritance rules under BD
+                            law.</span>
+                    </button>
+                    <button
+                        onclick="quickPrompt('Explain the grounds for divorce under the Dissolution of Muslim Marriages Act 1939.')"
+                        class="text-left p-3 border border-slate-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 transition-all text-sm group">
+                        <span class="block font-semibold group-hover:text-emerald-700">Family Law</span>
+                        <span class="text-slate-500 text-xs">Divorce, maintenance, and child custody.</span>
+                    </button>
+                    <button onclick="quickPrompt('What are the steps to register land in Bangladesh?')"
+                        class="text-left p-3 border border-slate-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 transition-all text-sm group">
+                        <span class="block font-semibold group-hover:text-emerald-700">Property Law</span>
+                        <span class="text-slate-500 text-xs">Land registration, transfer of property, etc.</span>
+                    </button>
+                    <button onclick="quickPrompt('What is the procedure for bail in a non-bailable offense?')"
+                        class="text-left p-3 border border-slate-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 transition-all text-sm group">
+                        <span class="block font-semibold group-hover:text-emerald-700">Criminal Procedure</span>
+                        <span class="text-slate-500 text-xs">Bail, FIR, and trial procedures under CrPC.</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages Display -->
+        <div id="chat-messages" class="hidden flex-grow overflow-y-auto space-y-6 pb-4 pr-2 chat-container">
+            <!-- Messages will appear here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="mt-4 relative">
+            <div id="typing-indicator" class="hidden absolute -top-8 left-4 text-xs text-slate-500 italic">
+                LawBot is searching Bangladesh statutes...
+            </div>
+            <div class="glass-morphism rounded-2xl shadow-xl border border-slate-200 p-2 flex items-end gap-2">
+                <textarea id="userInput" rows="1" placeholder="Ask about Bangladesh laws..."
+                    class="flex-grow bg-transparent border-none focus:ring-0 resize-none py-3 px-4 text-slate-700"
+                    style="max-height: 200px;"></textarea>
+                <button id="sendBtn"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white w-12 h-12 rounded-xl flex items-center justify-center transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <p class="text-[10px] text-center text-slate-400 mt-2">Disclaimer: This is an AI assistant, not a human
+                lawyer. Always consult with a registered advocate for official legal proceedings.</p>
+        </div>
+    </main>
+
+    <!-- Bot Logic handled by js/chatbot.js -->
+    <!-- Chatbot Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/chatbot.js"></script>
+</body>
+
+</html>
